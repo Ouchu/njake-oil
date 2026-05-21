@@ -7,6 +7,10 @@ app.secret_key = os.urandom(24)
 
 DB_FILE = "station_data.db"
 
+@app.route("/robots.txt")
+def robots():
+    return Response("User-agent: *\nAllow: /\n", mimetype="text/plain")
+
 FUEL_PRICES = {
     "petrol": "4,212",
     "diesel": "4,345"
@@ -51,16 +55,11 @@ def init_db():
     """)
     cursor.execute("SELECT value FROM system_config WHERE key = 'admin_user'")
     if not cursor.fetchone():
-        cursor.execute("INSERT INTO system_config (key, value) VALUES ('admin_user', 'OchuArtz')")
-        cursor.execute("INSERT INTO system_config (key, value) VALUES ('admin_pass', 'Ochu2026')")
+        cursor.execute("INSERT INTO system_config (key, value) VALUES ('admin_user', 'OchuArtz'), ('admin_pass', 'Ochu2026')")
     conn.commit()
     conn.close()
 
 init_db()
-
-@app.route("/robots.txt")
-def robots():
-    return Response("User-agent: *\nAllow: /\n", mimetype="text/plain")
 
 def get_db_credentials():
     conn = sqlite3.connect(DB_FILE)
@@ -100,6 +99,9 @@ def get_footer():
 
 @app.route("/")
 def home():
+    car_wash_html = "".join([f'<div class="flex justify-between items-start border-b border-stone-100 pb-3 last:border-0 last:pb-0"><div><h4 class="font-bold text-stone-900 text-sm">{item["service"]}</h4><p class="text-xs text-stone-500 mt-0.5">{item["desc"]}</p></div><span class="text-sm font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded whitespace-nowrap">{item["price"]}/=</span></div>' for item in CAR_WASH_PRICES])
+    diner_html = "".join([f'<div class="flex justify-between items-start border-b border-stone-100 pb-3 last:border-0 last:pb-0"><div><h4 class="font-bold text-stone-900 text-sm">{item["item"]}</h4><p class="text-xs text-stone-500 mt-0.5">{item["desc"]}</p></div><span class="text-sm font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded whitespace-nowrap">{item["price"]}/=</span></div>' for item in DINER_PRICES])
+    
     return f"""
     <!DOCTYPE html>
     <html lang="en">
@@ -107,16 +109,70 @@ def home():
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="google-site-verification" content="o5iVHg_XvWS6EozrnCE-Bp8obEF1LQzH2FgVrYnMlw0" />
-        <title>Njake Oil</title>
+        <title>Njake Oil & Commercial Hub - Boma Ng'ombe</title>
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     </head>
     <body class="bg-stone-50 text-stone-800 font-sans">
         {get_nav("home")}
-        </body>
+        <header class="bg-emerald-950 text-white py-20 px-6 text-center relative overflow-hidden">
+            <div class="relative z-10 max-w-3xl mx-auto">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-4 uppercase">Njake Petrol Station</h1>
+                <p class="text-lg text-emerald-100/85 mb-8 max-w-xl mx-auto">Refuel your vehicle with premium fuel, refresh your body at the diner, and keep your ride spotless.</p>
+                <a href="/hub" class="bg-emerald-500 hover:bg-emerald-600 font-bold px-6 py-3 rounded-lg shadow-md transition inline-block">Explore Our Business Hub →</a>
+            </div>
+        </header>
+        <section class="max-w-2xl mx-auto px-6 -mt-8 mb-12 relative z-20">
+            <div class="bg-white rounded-xl shadow-lg border border-stone-200 overflow-hidden">
+                <div class="bg-emerald-800 text-white px-6 py-3 flex justify-between items-center">
+                    <span class="font-bold tracking-wide text-sm uppercase">Live Station Price Board</span>
+                    <span class="text-xs bg-emerald-900 px-2 py-1 rounded text-emerald-300 font-mono">Currency: TZS / Litre</span>
+                </div>
+                <div class="grid grid-cols-2 divide-x divide-stone-200 text-center py-6">
+                    <div><p class="text-xs text-stone-500 font-bold uppercase tracking-wider">Petrol (Super)</p><p class="text-2xl font-black text-emerald-600 mt-1">{FUEL_PRICES['petrol']}/=</p></div>
+                    <div><p class="text-xs text-stone-500 font-bold uppercase tracking-wider">Diesel</p><p class="text-2xl font-black text-emerald-600 mt-1">{FUEL_PRICES['diesel']}/=</p></div>
+                </div>
+            </div>
+        </section>
+        <main class="max-w-6xl mx-auto px-6 py-4 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6"><h3 class="text-lg font-black text-emerald-950 uppercase border-b border-stone-100 pb-3 mb-4">Pro Car Wash</h3>{car_wash_html}</div>
+            <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6"><h3 class="text-lg font-black text-emerald-950 uppercase border-b border-stone-100 pb-3 mb-4">Diner Menu</h3>{diner_html}</div>
+        </main>
+        {get_footer()}
+    </body>
     </html>
     """
 
+@app.route("/hub", methods=["GET", "POST"])
+def hub():
+    status_message = ""
+    if request.method == "POST":
+        customer_name = request.form.get("name")
+        customer_phone = request.form.get("phone")
+        customer_msg = request.form.get("message")
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO feedback (name, phone, message) VALUES (?, ?, ?)", (customer_name, customer_phone, customer_msg))
+        conn.commit()
+        conn.close()
+        status_message = '<div class="bg-emerald-100 border text-emerald-800 px-4 py-3 rounded-lg mb-6 text-sm font-semibold">Message saved successfully.</div>'
+    return f"{get_nav('hub')} <main class='max-w-6xl mx-auto px-6 py-12'>{status_message}<h1 class='text-2xl font-bold'>Digital Reception</h1></main> {get_footer()}"
+
+@app.route("/admin", methods=["GET", "POST"])
+def admin():
+    if not session.get("logged_in"): return redirect(url_for("login"))
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, phone, message, timestamp FROM feedback ORDER BY id DESC")
+    rows = cursor.fetchall()
+    conn.close()
+    return f"{get_nav('admin')} <main class='p-12'><h1>Management Dashboard</h1></main> {get_footer()}"
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        session["logged_in"] = True
+        return redirect(url_for("admin"))
+    return f"{get_nav('admin')} <main class='p-12'><h1>Login</h1></main> {get_footer()}"
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
