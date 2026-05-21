@@ -126,8 +126,7 @@ def home():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="google-site-verification" content="google382db9a9f69dd8fa" />
-        <meta name="description" content="Njake Petrol Station and Commercial Hub in Boma Ng'ombe, Hai District. Premium fuel, professional car wash, and local dining services available 24/7." />
+        <meta name="google-site-verification" content="o5iVHg_XvWS6EozrnCE-Bp8obEF1LQzH2FgVrYnMlw0" />
         <title>Njake Oil & Commercial Hub - Boma Ng'ombe</title>
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     </head>
