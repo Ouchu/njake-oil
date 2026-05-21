@@ -5,8 +5,7 @@ import os
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_FILE = os.path.join(BASE_DIR, "station_data.db")
+DB_FILE = "station_data.db"
 
 FUEL_PRICES = {
     "petrol": "4,212",
@@ -23,7 +22,7 @@ STATION_CONTACT = {
 CAR_WASH_PRICES = [
     {"service": "Body Wash (Normal)", "price": "5,000", "desc": "Exterior pressure wash, tire shine, and basic wipe down."},
     {"service": "Full Wash & Vacuum", "price": "10,000", "desc": "Body wash, undercarriage clean, and thorough interior vacuum."},
-    {"service": "Engine & Machine Wash", "price": "7,000", "desc": "Degreasing and high-pressure steam cleaning of the engine bay."}
+    {"service": "Engine & Machine Wash", "price": "15,000", "desc": "Degreasing and high-pressure steam cleaning of the engine bay."}
 ]
 
 DINER_PRICES = [
@@ -127,9 +126,10 @@ def home():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Njake Oil</title>
+        <meta name="google-site-verification" content="google382db9a9f69dd8fa" />
+        <meta name="description" content="Njake Petrol Station and Commercial Hub in Boma Ng'ombe, Hai District. Premium fuel, professional car wash, and local dining services available 24/7." />
+        <title>Njake Oil & Commercial Hub - Boma Ng'ombe</title>
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-        <meta name="google-site-verification" content="o5iVHg_XvWS6EozrnCE-Bp8obEF1LQzH2FgVrYnMlw0" />
     </head>
     <body class="bg-stone-50 text-stone-800 font-sans">
         {get_nav("home")}
@@ -516,4 +516,6 @@ def delete_message(record_id):
     return redirect(url_for('admin'))
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
