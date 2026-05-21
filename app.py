@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, url_for, session
+from flask import Flask, request, redirect, url_for, session, Response
 import sqlite3
 import os
 
@@ -93,6 +93,11 @@ def get_footer():
         <p>&copy; 2026 Njake Oil Station & Commercial Hub. All rights reserved.</p>
     </footer>
     """
+
+@app.route("/robots.txt")
+def robots():
+    robots_text = "User-agent: *\nAllow: /\n"
+    return Response(robots_text, mimetype="text/plain")
 
 @app.route("/")
 def home():
